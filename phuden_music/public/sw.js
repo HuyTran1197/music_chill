@@ -1,6 +1,6 @@
 // Đổi số này mỗi khi bạn deploy bản mới (thêm nhạc, sửa giao diện...)
 // để máy bạn bè tự cập nhật thay vì dùng bản cache cũ.
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const RUNTIME_CACHE = `chill-runtime-${CACHE_VERSION}`;
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -24,13 +24,16 @@ self.addEventListener("fetch", (event) => {
     if (url.pathname.includes("/audio/")) {
         event.respondWith(
             caches.open(RUNTIME_CACHE).then(async (cache) => {
-                const cached = await cache.match(event.request);
+                // Safari (và nhiều trình duyệt mobile) tải file audio theo từng đoạn nhỏ
+                // (HTTP Range request) thay vì tải nguyên file. Nếu cache theo đúng request
+                // gốc, mỗi lần sẽ chỉ lưu được 1 mảnh nhỏ -> lúc offline bị thiếu, không phát được.
+                // Giải pháp: luôn bỏ qua header Range, tải + cache NGUYÊN file hoàn chỉnh.
+                const cleanRequest = new Request(url.href, { method: "GET" });
+                const cached = await cache.match(cleanRequest);
                 if (cached) return cached;
                 try {
-                    // cache: "reload" -> luôn hỏi thẳng server, bỏ qua cache HTTP của trình duyệt,
-                    // tránh việc lỡ dính 1 lần lỗi (404) rồi bị nhớ nhầm mãi.
-                    const response = await fetch(event.request, { cache: "reload" });
-                    if (response.ok) cache.put(event.request, response.clone());
+                    const response = await fetch(cleanRequest, { cache: "reload" });
+                    if (response.ok) cache.put(cleanRequest, response.clone());
                     return response;
                 } catch (err) {
                     return cached || Promise.reject(err);
