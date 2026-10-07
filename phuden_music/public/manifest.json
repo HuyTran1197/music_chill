@@ -1,0 +1,18 @@
+{
+  "name": "Chill Cùng Goonch",
+  "short_name": "Chill",
+  "description": "App nghe nhạc nho nhỏ để nghe cùng bạn bè, không cần mạng.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#171423",
+  "theme_color": "#171423",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
