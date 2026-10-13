@@ -17,7 +17,9 @@ export default function AlbumCard({ album, isActive, onOpen }) {
             </div>
             <div className="album-card-text">
                 <p className="album-card-title">{album.title}</p>
-                <p className="album-card-subtitle">{album.subtitle}</p>
+                <p className="album-card-subtitle">
+                    {album.subtitle} · {album.songs.length} bài
+                </p>
             </div>
             {isActive && <span className="now-playing-dot" aria-hidden="true" />}
         </button>

@@ -9,15 +9,6 @@ function shuffleArray(arr) {
     return a;
 }
 
-/**
- * Điều khiển phát nhạc cho toàn app.
- *
- * Nguyên tắc quan trọng: các hàm như playNext/playPrev/toggleShuffle CHỈ cập nhật
- * state (queue, queuePos) một cách thuần tuý (pure), không tự gọi audio.play() bên trong.
- * Việc thật sự nạp + phát file mp3 được xử lý riêng trong 1 useEffect, chạy đúng 1 lần
- * mỗi khi bài hát (currentSong) thực sự đổi. Tách như vậy để tránh xung đột khi
- * React (StrictMode, môi trường dev) gọi lặp các hàm cập nhật state.
- */
 export function usePlayer() {
     const audioRef = useRef(null);
     if (!audioRef.current && typeof window !== "undefined") {
@@ -34,14 +25,31 @@ export function usePlayer() {
 
     const baseOrderRef = useRef([]);
     const queueRef = useRef([]);
+    const queuePosRef = useRef(-1);
     const isShuffledRef = useRef(false);
 
     useEffect(() => { queueRef.current = queue; }, [queue]);
+    useEffect(() => { queuePosRef.current = queuePos; }, [queuePos]);
     useEffect(() => { isShuffledRef.current = isShuffled; }, [isShuffled]);
 
     const currentSong = queue[queuePos] || null;
 
-    // ---------- Sự kiện của thẻ <audio> ----------
+    const playNext = useCallback(() => {
+        setQueuePos((pos) => {
+            const len = queueRef.current.length;
+            if (len === 0) return pos;
+            return (pos + 1) % len;
+        });
+    }, []);
+
+    const playPrev = useCallback(() => {
+        setQueuePos((pos) => {
+            const len = queueRef.current.length;
+            if (len === 0) return pos;
+            return (pos - 1 + len) % len;
+        });
+    }, []);
+
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -67,20 +75,19 @@ export function usePlayer() {
             audio.removeEventListener("pause", onPause);
             audio.removeEventListener("ended", onEnded);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [playNext]);
 
-    // ---------- Nạp + phát bài hát thật sự (CHỈ chạy khi id bài hát đổi) ----------
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio || !currentSong) return;
         audio.src = currentSong.src;
         audio.currentTime = 0;
-        audio.play().catch((err) => console.warn("Không phát được:", err));
+        audio.play().catch((err) => {
+            console.warn(`Không phát được "${currentSong.title}" (${currentSong.src}):`, err.message);
+            playNext();
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentSong?.id]);
-
-    // ---------- Các hàm điều khiển: chỉ cập nhật state, KHÔNG tự phát nhạc ----------
 
     const playAlbum = useCallback((album, startIndex = 0, shuffled) => {
         const useShuffle = shuffled ?? isShuffledRef.current;
@@ -92,6 +99,42 @@ export function usePlayer() {
         setIsShuffled(useShuffle);
     }, []);
 
+    // Đồng bộ hàng đợi khi danh sách bài của album đang phát bị thay đổi (có người tháo/thêm bài)
+    const syncAlbum = useCallback((album) => {
+        const oldQueue = queueRef.current;
+        const oldPos = queuePosRef.current;
+        const current = oldQueue[oldPos];
+        const ids = new Set(album.songs.map((s) => s.id));
+
+        baseOrderRef.current = album.songs;
+        setCurrentAlbum(album);
+
+        let nextQueue;
+        if (isShuffledRef.current) {
+            const kept = oldQueue.filter((s) => ids.has(s.id));
+            const added = album.songs.filter((s) => !oldQueue.some((q) => q.id === s.id));
+            nextQueue = [...kept, ...added];
+        } else {
+            nextQueue = [...album.songs];
+        }
+
+        if (nextQueue.length === 0) {
+            audioRef.current?.pause();
+            setQueue([]);
+            setQueuePos(-1);
+            return;
+        }
+
+        let newPos = current ? nextQueue.findIndex((s) => s.id === current.id) : -1;
+        if (newPos < 0) {
+            // Bài đang phát vừa bị tháo: chuyển sang bài kế tiếp còn tồn tại
+            const following = oldQueue.slice(oldPos + 1).find((s) => ids.has(s.id));
+            newPos = following ? nextQueue.findIndex((s) => s.id === following.id) : 0;
+        }
+        setQueue(nextQueue);
+        setQueuePos(newPos < 0 ? 0 : newPos);
+    }, []);
+
     const togglePlayPause = useCallback(() => {
         const audio = audioRef.current;
         if (!audio || !currentSong) return;
@@ -101,22 +144,6 @@ export function usePlayer() {
             audio.pause();
         }
     }, [currentSong]);
-
-    const playNext = useCallback(() => {
-        setQueuePos((pos) => {
-            const len = queueRef.current.length;
-            if (len === 0) return pos;
-            return (pos + 1) % len; // hết bài cuối -> tự quay lại bài đầu
-        });
-    }, []);
-
-    const playPrev = useCallback(() => {
-        setQueuePos((pos) => {
-            const len = queueRef.current.length;
-            if (len === 0) return pos;
-            return (pos - 1 + len) % len;
-        });
-    }, []);
 
     const toggleShuffle = useCallback(() => {
         setIsShuffled((wasShuffled) => {
@@ -144,8 +171,22 @@ export function usePlayer() {
         audio.currentTime = pct * audio.duration;
     }, []);
 
+    // Tải trước cả album để nghe offline
+    const prefetchAlbum = useCallback(async (album, onProgress) => {
+        const results = await Promise.allSettled(
+            album.songs.map((song) =>
+                fetch(song.src).then((res) => {
+                    if (!res.ok) throw new Error(`Không tải được: ${song.src}`);
+                    onProgress?.();
+                })
+            )
+        );
+        const failed = results.filter((r) => r.status === "rejected").length;
+        return { total: album.songs.length, failed };
+    }, []);
+
     return {
         currentAlbum, currentSong, queue, queuePos, isShuffled, isPlaying, progress, duration,
-        playAlbum, togglePlayPause, playNext, playPrev, toggleShuffle, seekTo,
+        playAlbum, syncAlbum, togglePlayPause, playNext, playPrev, toggleShuffle, seekTo, prefetchAlbum,
     };
 }

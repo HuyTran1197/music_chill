@@ -4,6 +4,8 @@ export default function AlbumIcon({ type, accent }) {
         case "heart-wave": return <HeartWave />;
         case "fire-burst": return <FireBurst />;
         case "cassette": return <Cassette accent={accent} />;
+        case "golden-note": return <GoldenNote />;
+        case "leaf-sprout": return <LeafSprout />;
         case "note-cluster":
         default: return <NoteCluster accent={accent} />;
     }
@@ -127,6 +129,80 @@ function NoteCluster() {
                     <path d="M40 15 v34 a8 8 0 1 1 -4 -7 V22 l24 -6 v30 a8 8 0 1 1 -4 -7 V9 Z" fill="#FFFFFF" opacity="0.75" />
                 </svg>
             </div>
+        </div>
+    );
+}
+
+function GoldenNote() {
+    return (
+        <div className="icon-stage">
+            <svg className="gold-rays" viewBox="0 0 100 100" width="100%" height="100%">
+                <g stroke="#FFE7A3" strokeWidth="2.5" strokeLinecap="round" opacity="0.75">
+                    {Array.from({ length: 12 }, (_, i) => {
+                        const a = (i * 30 * Math.PI) / 180;
+                        const outer = i % 2 ? 44 : 48;
+                        return (
+                            <line
+                                key={i}
+                                x1={50 + Math.cos(a) * 36}
+                                y1={50 + Math.sin(a) * 36}
+                                x2={50 + Math.cos(a) * outer}
+                                y2={50 + Math.sin(a) * outer}
+                            />
+                        );
+                    })}
+                </g>
+            </svg>
+
+            <div className="icon-3d gold-pulse">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <defs>
+                        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#FFF3C4" />
+                            <stop offset="55%" stopColor="#FFD166" />
+                            <stop offset="100%" stopColor="#E0A030" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="30" fill="rgba(255,255,255,0.12)" stroke="url(#goldGrad)" strokeWidth="3" />
+                    <g transform="translate(2 17)">
+                        <path
+                            d="M40 15 v34 a8 8 0 1 1 -4 -7 V22 l24 -6 v30 a8 8 0 1 1 -4 -7 V9 Z"
+                            fill="url(#goldGrad)"
+                        />
+                    </g>
+                </svg>
+            </div>
+
+            <span className="twinkle twinkle-1">✦</span>
+            <span className="twinkle twinkle-2">✦</span>
+            <span className="twinkle twinkle-3">✦</span>
+        </div>
+    );
+}
+
+function LeafSprout() {
+    return (
+        <div className="icon-stage">
+            <div className="icon-3d sprout-glow">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="52" r="38" fill="rgba(255,255,255,0.2)" />
+                </svg>
+            </div>
+
+            <svg className="icon-overlay" viewBox="0 0 100 100" width="78%" height="78%">
+                <path d="M50 82 C50 68 50 56 50 44" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" fill="none" />
+                <path d="M34 84 Q50 78 66 84" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.7" />
+                <g className="leaf leaf-left">
+                    <path d="M50 58 C34 58 24 48 22 34 C38 34 48 42 50 58 Z" fill="#FFFFFF" />
+                </g>
+                <g className="leaf leaf-right">
+                    <path d="M50 46 C66 46 76 36 78 22 C62 22 52 30 50 46 Z" fill="#FFFFFF" opacity="0.92" />
+                </g>
+            </svg>
+
+            <span className="mote mote-1" />
+            <span className="mote mote-2" />
+            <span className="mote mote-3" />
         </div>
     );
 }

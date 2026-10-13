@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage.jsx";
 import AlbumPage from "./pages/AlbumPage.jsx";
 import PlayerBar from "./components/PlayerBar.jsx";
 import { usePlayerContext } from "./context/PlayerContext.jsx";
+import MusicRoomPage from "./pages/MusicRoomPage.jsx";
 
 export default function App() {
     const player = usePlayerContext();
@@ -12,13 +13,14 @@ export default function App() {
             <header className="top-bar">
                 <div className="brand">
                     <span className="brand-mark">◐</span>
-                    <h1>Chill Cùng Goonch</h1>
+                    <h1>Chill Cùng Nhau</h1>
                 </div>
             </header>
 
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/album/:albumId" element={<AlbumPage />} />
+                <Route path="/kho-nhac" element={<MusicRoomPage />} />
             </Routes>
 
             <PlayerBar
