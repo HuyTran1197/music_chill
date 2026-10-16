@@ -296,6 +296,26 @@ export const ALBUMS = [
                 title: "Đứa bé",
                 artist: "Đang cập nhật",
                 src: "/audio/nhac-8x9x/track-15.mp3",
+            },{
+                id: "nhac-8x9x-16",
+                title: "Anh chỉ biết câm nín nghe tiếng em khóc",
+                artist: "UHP",
+                src: "/audio/nhac-8x9x/track-16.mp3",
+            },{
+                id: "nhac-8x9x-17",
+                title: "Ngày không em",
+                artist: "UHP",
+                src: "/audio/nhac-8x9x/track-17.mp3",
+            },{
+                id: "nhac-8x9x-18",
+                title: "Thà một lần đau",
+                artist: "UHP",
+                src: "/audio/nhac-8x9x/track-18.mp3",
+            },{
+                id: "nhac-8x9x-19",
+                title: "Cắn rứt",
+                artist: "UHP",
+                src: "/audio/nhac-8x9x/track-19.mp3",
             },
         ],
     },
@@ -433,5 +453,60 @@ export const ROOM_SONGS = [
       title: "Trouble is a friend",
       artist: "Đang cập nhật",
       src: "/audio/room/room-24.mp3",
+    },{
+      id: "room-25",
+      title: "Buồn làm chi em ơi",
+      artist: "Hoài Lâm",
+      src: "/audio/room/room-25.mp3",
+    },{
+      id: "room-26",
+      title: "Đừng hẹn kiếp sau",
+      artist: "Đình Dũng",
+      src: "/audio/room/room-26.mp3",
+    },{
+      id: "room-27",
+      title: "Một đời",
+      artist: "buitruonglinh, 14 Casper, Bon Nghiêm",
+      src: "/audio/room/room-27.mp3",
+    },{
+      id: "room-28",
+      title: "Kiệu hoa & Rước nàng",
+      artist: "Remix",
+      src: "/audio/room/room-28.mp3",
+    },{
+      id: "room-29",
+      title: "Em khác gì hoa",
+      artist: "Remix",
+      src: "/audio/room/room-29.mp3",
+    },{
+      id: "room-30",
+      title: "Cả một trời thương nhớ",
+      artist: "Hồ Ngọc Hà, Hoài Sa",
+      src: "/audio/room/room-30.mp3",
+    },{
+      id: "room-31",
+      title: "Yên một người tổn thuơng",
+      artist: "Nhật Phong",
+      src: "/audio/room/room-31.mp3",
+    },{
+      id: "room-32",
+      title: "Sợ phải kết thúc Remix",
+      artist: "Nhật Phong",
+      src: "/audio/room/room-32.mp3",
+    },{
+      id: "room-33",
+      title: "Anh đã từng cố gắng Remix",
+      artist: "Nhật Phong",
+      src: "/audio/room/room-33.mp3",
+    },{
+      id: "room-34",
+      title: "Ánh sáng nơi cuối con đường",
+      artist: "LK, Eddy Việt",
+      src: "/audio/room/room-34.mp3",
+    },{
+      id: "room-35",
+      title: "Ngọn nến trước gió",
+      artist: "LK, JustaTee, Emily",
+      src: "/audio/room/room-35.mp3",
     },
 ];
